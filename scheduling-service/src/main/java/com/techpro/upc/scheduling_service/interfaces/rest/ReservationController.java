@@ -1,10 +1,18 @@
 package com.techpro.upc.scheduling_service.interfaces.rest;
 
 
+import com.techpro.upc.scheduling_service.domain.model.queries.GetAllReservationsQuery;
+import com.techpro.upc.scheduling_service.domain.model.queries.GetReservationByIdQuery;
 import com.techpro.upc.scheduling_service.domain.services.PaymentQueryService;
 import com.techpro.upc.scheduling_service.domain.services.ReservationCommandService;
 import com.techpro.upc.scheduling_service.domain.services.ReservationQueryService;
 import com.techpro.upc.scheduling_service.domain.services.TimeSlotQueryService;
+import com.techpro.upc.scheduling_service.interfaces.rest.resources.CreateReservationResource;
+import com.techpro.upc.scheduling_service.interfaces.rest.resources.ReservationDetailsResource;
+import com.techpro.upc.scheduling_service.interfaces.rest.resources.ReservationResource;
+import com.techpro.upc.scheduling_service.interfaces.rest.transform.CreateReservationCommandFromResourceAssembler;
+import com.techpro.upc.scheduling_service.interfaces.rest.transform.ReservationDetailsResourceFromEntityAssembler;
+import com.techpro.upc.scheduling_service.interfaces.rest.transform.ReservationResourceFromEntityAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -115,7 +123,7 @@ public class ReservationController {
 
         var detailsResource = ReservationDetailsResourceFromEntityAssembler.toResourceFromEntity(
                 reservation.get(),
-                providerContextFacade,
+                psycologistContextFacade,
                 timeSlotQueryService,
                 workerContextFacade,
                 paymentQueryService
@@ -147,7 +155,7 @@ public class ReservationController {
         var resources = reservations.stream()
                 .map(res -> ReservationDetailsResourceFromEntityAssembler.toResourceFromEntity(
                         res,
-                        providerContextFacade,
+                        psycologistContextFacade,
                         timeSlotQueryService,
                         workerContextFacade,
                         paymentQueryService

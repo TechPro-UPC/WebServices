@@ -72,7 +72,7 @@ public class TimeSlotController {
             @ApiResponse(responseCode = "404", description = "TimeSlot not found")
     })
     public ResponseEntity<TimeSlotResource> getTimeSlotById(@PathVariable Long id) {
-        var query = new com.paxtech.utime.platform.reservations.domain.model.queries.GetTimeSlotByIdQuery(id);
+        var query = new com.techpro.upc.scheduling_service.domain.model.queries.GetAllTimeSlotsQuery();
         var result = timeSlotQueryService.handle(query);
         if (result.isEmpty()) return ResponseEntity.notFound().build();
         var resource = TimeSlotResourceFromEntityAssembler.toResourceFromEntity(result.get());
@@ -91,7 +91,7 @@ public class TimeSlotController {
     })
     public ResponseEntity<Iterable<TimeSlotResource>> getAllTimeSlots() {
         var timeSlots = timeSlotQueryService.handle(
-                new com.paxtech.utime.platform.reservations.domain.model.queries.GetAllTimeSlotsQuery());
+                new com.techpro.upc.scheduling_service.domain.model.queries.GetAllTimeSlotsQuery());
         if (timeSlots.isEmpty()) return ResponseEntity.notFound().build();
         var resources = timeSlots.stream()
                 .map(TimeSlotResourceFromEntityAssembler::toResourceFromEntity)

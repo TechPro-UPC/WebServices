@@ -1,11 +1,12 @@
 package com.techpro.upc.scheduling_service.interfaces.rest;
 
-import com.paxtech.utime.platform.reservations.domain.services.TimeSlotCommandService;
-import com.paxtech.utime.platform.reservations.domain.services.TimeSlotQueryService;
-import com.paxtech.utime.platform.reservations.interfaces.rest.resources.CreateTimeSlotResource;
-import com.paxtech.utime.platform.reservations.interfaces.rest.resources.TimeSlotResource;
-import com.paxtech.utime.platform.reservations.interfaces.rest.transform.CreateTimeSlotCommandFromResourceAssembler;
-import com.paxtech.utime.platform.reservations.interfaces.rest.transform.TimeSlotResourceFromEntityAssembler;
+
+import com.techpro.upc.scheduling_service.domain.services.TimeSlotCommandService;
+import com.techpro.upc.scheduling_service.domain.services.TimeSlotQueryService;
+import com.techpro.upc.scheduling_service.interfaces.rest.resources.CreateTimeSlotResource;
+import com.techpro.upc.scheduling_service.interfaces.rest.resources.TimeSlotResource;
+import com.techpro.upc.scheduling_service.interfaces.rest.transform.CreateTimeSlotCommandFromResourceAssembler;
+import com.techpro.upc.scheduling_service.interfaces.rest.transform.TimeSlotResourceFromEntityAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

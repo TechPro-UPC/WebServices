@@ -1,14 +1,15 @@
 package com.techpro.upc.scheduling_service.interfaces.rest;
 
-import com.paxtech.utime.platform.reservations.domain.model.commands.CreatePaymentCommand;
-import com.paxtech.utime.platform.reservations.domain.model.queries.GetAllPaymentsQuery;
-import com.paxtech.utime.platform.reservations.domain.model.queries.GetPaymentByIdQuery;
-import com.paxtech.utime.platform.reservations.domain.services.PaymentCommandService;
-import com.paxtech.utime.platform.reservations.domain.services.PaymentQueryService;
-import com.paxtech.utime.platform.reservations.interfaces.rest.resources.CreatePaymentResource;
-import com.paxtech.utime.platform.reservations.interfaces.rest.resources.PaymentResource;
-import com.paxtech.utime.platform.reservations.interfaces.rest.transform.CreatePaymentCommandFromResourceAssembler;
-import com.paxtech.utime.platform.reservations.interfaces.rest.transform.PaymentResourceFromEntityAssembler;
+
+import com.techpro.upc.scheduling_service.domain.model.commands.CreatePaymentCommand;
+import com.techpro.upc.scheduling_service.domain.model.queries.GetAllPaymentsQuery;
+import com.techpro.upc.scheduling_service.domain.model.queries.GetPaymentByIdQuery;
+import com.techpro.upc.scheduling_service.domain.services.PaymentCommandService;
+import com.techpro.upc.scheduling_service.domain.services.PaymentQueryService;
+import com.techpro.upc.scheduling_service.interfaces.rest.resources.CreatePaymentResource;
+import com.techpro.upc.scheduling_service.interfaces.rest.resources.PaymentResource;
+import com.techpro.upc.scheduling_service.interfaces.rest.transform.CreatePaymentCommandFromResourceAssembler;
+import com.techpro.upc.scheduling_service.interfaces.rest.transform.PaymentResourceFromEntityAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

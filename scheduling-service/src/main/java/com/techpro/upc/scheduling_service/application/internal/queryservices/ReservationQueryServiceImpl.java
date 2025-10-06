@@ -1,10 +1,11 @@
 package com.techpro.upc.scheduling_service.application.internal.queryservices;
 
-import com.paxtech.utime.platform.reservations.domain.model.aggregates.Reservation;
-import com.paxtech.utime.platform.reservations.domain.model.queries.GetAllReservationsQuery;
-import com.paxtech.utime.platform.reservations.domain.model.queries.GetReservationByIdQuery;
-import com.paxtech.utime.platform.reservations.domain.services.ReservationQueryService;
-import com.paxtech.utime.platform.reservations.infrastructure.persistence.jpa.repositories.ReservationRepository;
+
+import com.techpro.upc.scheduling_service.domain.model.aggregates.Reservation;
+import com.techpro.upc.scheduling_service.domain.model.queries.GetAllReservationsQuery;
+import com.techpro.upc.scheduling_service.domain.model.queries.GetReservationByIdQuery;
+import com.techpro.upc.scheduling_service.domain.services.ReservationQueryService;
+import com.techpro.upc.scheduling_service.infrastructure.persistence.jpa.repositories.ReservationRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

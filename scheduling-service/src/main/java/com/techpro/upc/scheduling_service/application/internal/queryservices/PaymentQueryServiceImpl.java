@@ -1,10 +1,11 @@
 package com.techpro.upc.scheduling_service.application.internal.queryservices;
 
-import com.paxtech.utime.platform.reservations.domain.model.aggregates.Payment;
-import com.paxtech.utime.platform.reservations.domain.model.queries.GetAllPaymentsQuery;
-import com.paxtech.utime.platform.reservations.domain.model.queries.GetPaymentByIdQuery;
-import com.paxtech.utime.platform.reservations.domain.services.PaymentQueryService;
-import com.paxtech.utime.platform.reservations.infrastructure.persistence.jpa.repositories.PaymentRepository;
+
+import com.techpro.upc.scheduling_service.domain.model.aggregates.Payment;
+import com.techpro.upc.scheduling_service.domain.model.queries.GetAllPaymentsQuery;
+import com.techpro.upc.scheduling_service.domain.model.queries.GetPaymentByIdQuery;
+import com.techpro.upc.scheduling_service.domain.services.PaymentQueryService;
+import com.techpro.upc.scheduling_service.infrastructure.persistence.jpa.repositories.PaymentRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

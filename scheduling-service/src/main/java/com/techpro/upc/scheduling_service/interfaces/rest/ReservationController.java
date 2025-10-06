@@ -1,19 +1,10 @@
 package com.techpro.upc.scheduling_service.interfaces.rest;
 
-import com.paxtech.utime.platform.profiles.interfaces.acl.ProviderContextFacade;
-import com.paxtech.utime.platform.reservations.domain.model.queries.GetAllReservationsQuery;
-import com.paxtech.utime.platform.reservations.domain.model.queries.GetReservationByIdQuery;
-import com.paxtech.utime.platform.reservations.domain.services.PaymentQueryService;
-import com.paxtech.utime.platform.reservations.domain.services.ReservationCommandService;
-import com.paxtech.utime.platform.reservations.domain.services.ReservationQueryService;
-import com.paxtech.utime.platform.reservations.domain.services.TimeSlotQueryService;
-import com.paxtech.utime.platform.reservations.interfaces.rest.resources.CreateReservationResource;
-import com.paxtech.utime.platform.reservations.interfaces.rest.resources.ReservationDetailsResource;
-import com.paxtech.utime.platform.reservations.interfaces.rest.resources.ReservationResource;
-import com.paxtech.utime.platform.reservations.interfaces.rest.transform.CreateReservationCommandFromResourceAssembler;
-import com.paxtech.utime.platform.reservations.interfaces.rest.transform.ReservationDetailsResourceFromEntityAssembler;
-import com.paxtech.utime.platform.reservations.interfaces.rest.transform.ReservationResourceFromEntityAssembler;
-import com.paxtech.utime.platform.workers.interfaces.rest.acl.WorkerContextFacade;
+
+import com.techpro.upc.scheduling_service.domain.services.PaymentQueryService;
+import com.techpro.upc.scheduling_service.domain.services.ReservationCommandService;
+import com.techpro.upc.scheduling_service.domain.services.ReservationQueryService;
+import com.techpro.upc.scheduling_service.domain.services.TimeSlotQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -34,7 +25,7 @@ import java.util.List;
 public class ReservationController {
     private final ReservationCommandService reservationCommandService;
     private final ReservationQueryService reservationQueryService;
-    private final ProviderContextFacade providerContextFacade;
+    private final PsycologistContextFacade providerContextFacade;
     private final TimeSlotQueryService timeSlotQueryService;
     private final WorkerContextFacade workerContextFacade;
     private final PaymentQueryService paymentQueryService;
@@ -45,10 +36,10 @@ public class ReservationController {
      * @param reservationQueryService The {@link ReservationQueryService} instance
      */
     public ReservationController(ReservationCommandService reservationCommandService,
-                                 ReservationQueryService reservationQueryService, ProviderContextFacade providerContextFacade, TimeSlotQueryService timeSlotQueryService, WorkerContextFacade workerContextFacade, PaymentQueryService paymentQueryService) {
+                                 ReservationQueryService reservationQueryService, PsycologistContextFacade psycologistContextFacade, TimeSlotQueryService timeSlotQueryService, WorkerContextFacade workerContextFacade, PaymentQueryService paymentQueryService) {
         this.reservationCommandService = reservationCommandService;
         this.reservationQueryService = reservationQueryService;
-        this.providerContextFacade = providerContextFacade;
+        this.psycologistContextFacade = psycologistContextFacade;
         this.timeSlotQueryService = timeSlotQueryService;
         this.workerContextFacade = workerContextFacade;
         this.paymentQueryService = paymentQueryService;

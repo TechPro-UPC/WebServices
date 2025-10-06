@@ -7,7 +7,7 @@ public class CreateReservationCommandFromResourceAssembler {
     public static CreateReservationCommand toCommandFromResource(CreateReservationResource resource) {
         return new CreateReservationCommand(
                 resource.patientId(),
-                resource.providerId(),
+                resource.psycologistId(),
                 resource.paymentId(),
                 resource.timeSlotId(),
                 resource.workerId()

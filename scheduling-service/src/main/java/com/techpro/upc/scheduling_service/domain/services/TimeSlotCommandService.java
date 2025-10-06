@@ -1,7 +1,6 @@
 package com.techpro.upc.scheduling_service.domain.services;
 
 import com.techpro.upc.scheduling_service.domain.model.aggregates.TimeSlot;
-import com.techpro.upc.scheduling_service.domain.model.commands.CreateTimeSlotCommand;
 import com.techpro.upc.scheduling_service.domain.model.queries.GetAllTimeSlotsQuery;
 import com.techpro.upc.scheduling_service.domain.model.queries.GetTimeSlotByIdQuery;
 

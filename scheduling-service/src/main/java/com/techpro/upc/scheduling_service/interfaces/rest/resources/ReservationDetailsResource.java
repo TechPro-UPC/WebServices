@@ -6,7 +6,7 @@ import com.techpro.upc.scheduling_service.interfaces.rest.acl.WorkerDto;
 public record ReservationDetailsResource(
         Long id,
         Long patientId,
-        PsycologistDto pycologist,
+        PsycologistDto psycologist,
         PaymentResource paymentId,
         TimeSlotResource timeSlot,
         WorkerDto workerId

@@ -1,10 +1,11 @@
 package com.techpro.upc.scheduling_service.application.internal.queryservices;
 
-import com.paxtech.utime.platform.reservations.domain.model.aggregates.TimeSlot;
-import com.paxtech.utime.platform.reservations.domain.model.queries.GetAllTimeSlotsQuery;
-import com.paxtech.utime.platform.reservations.domain.model.queries.GetTimeSlotByIdQuery;
-import com.paxtech.utime.platform.reservations.domain.services.TimeSlotQueryService;
-import com.paxtech.utime.platform.reservations.infrastructure.persistence.jpa.repositories.TimeSlotRepository;
+
+import com.techpro.upc.scheduling_service.domain.model.aggregates.TimeSlot;
+import com.techpro.upc.scheduling_service.domain.model.queries.GetAllTimeSlotsQuery;
+import com.techpro.upc.scheduling_service.domain.model.queries.GetTimeSlotByIdQuery;
+import com.techpro.upc.scheduling_service.domain.services.TimeSlotQueryService;
+import com.techpro.upc.scheduling_service.infrastructure.persistence.jpa.repositories.TimeSlotRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,12 +19,10 @@ public class TimeSlotQueryServiceImpl implements TimeSlotQueryService {
         this.timeSlotRepository = timeSlotRepository;
     }
 
-    @Override
     public Optional<TimeSlot> handle(GetTimeSlotByIdQuery query) {
-        return timeSlotRepository.findById(query.Id());
+        return timeSlotRepository.findById(query.id());
     }
 
-    @Override
     public List<TimeSlot> handle(GetAllTimeSlotsQuery query){
         return timeSlotRepository.findAll();
     }

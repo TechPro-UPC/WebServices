@@ -8,10 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface PatientRepository extends JpaRepository<Patient, Long> {
-
-    Optional<Patient> findByDni(String dni);
-
     Optional<Patient> findByUserId(Long userId);
-
-    boolean existsByDni(String dni);
+    Optional<Patient> findByDni(String dni);
 }

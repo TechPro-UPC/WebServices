@@ -1,5 +1,6 @@
 package com.techpro.upc.profiles_service.interfaces.rest.advices;
 
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,14 +37,28 @@ public class GlobalExceptionHandler {
         }
 
         if (message.contains("dni")) {
-            error.put("error", "Ya existe un paciente con el mismo DNI.");
+            error.put("error", "Ya existe un registro con el mismo DNI.");
         } else if (message.contains("user_id")) {
-            error.put("error", "Ya existe un paciente asociado a ese usuario.");
+            error.put("error", "Ya existe un perfil asociado a ese usuario.");
+        } else if (message.contains("license_number")) {
+            error.put("error", "Ya existe un psicólogo con el mismo número de licencia.");
         } else {
             error.put("error", "Error de integridad de datos. Verifique los valores únicos.");
         }
 
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    // ✅ NUEVO: captura errores de validación de campos (como @Size, @NotNull, etc.)
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, String>> handleConstraintViolationException(ConstraintViolationException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getConstraintViolations().forEach(v -> {
+            String field = v.getPropertyPath().toString();
+            String message = v.getMessage();
+            errors.put(field, message);
+        });
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)

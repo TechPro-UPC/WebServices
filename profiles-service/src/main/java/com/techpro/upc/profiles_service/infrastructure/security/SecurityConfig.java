@@ -43,7 +43,8 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/api/v1/patients/**"
+                                "/api/v1/patients/**",
+                                "/api/v1/psychologists/**"
                         ).permitAll() // temporalmente abierto
                         .anyRequest().authenticated()
                 )

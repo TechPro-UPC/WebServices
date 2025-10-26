@@ -6,8 +6,8 @@ import com.techpro.upc.profiles_service.domain.services.PatientCommandService;
 import com.techpro.upc.profiles_service.infrastructure.iam.IamClient;
 import com.techpro.upc.profiles_service.infrastructure.persistance.jpa.repositories.PatientRepository;
 import com.techpro.upc.profiles_service.infrastructure.persistance.jpa.repositories.PsychologistRepository;
+import feign.FeignException;
 import jakarta.transaction.Transactional;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -31,23 +31,34 @@ public class PatientCommandServiceImpl implements PatientCommandService {
     @Transactional
     public Optional<Patient> handle(CreatePatientCommand command) {
 
-        // 1️⃣ Validar usuario existente
-        ResponseEntity<?> userResponse = iamClient.getUserById(command.userId());
-        if (!userResponse.getStatusCode().is2xxSuccessful() || userResponse.getBody() == null) {
-            throw new IllegalArgumentException("El usuario con ID " + command.userId() + " no existe en el IAM Service.");
+        // 1) Validar que el usuario exista en IAM
+        try {
+            var user = iamClient.getUserById(command.userId());
+            if (user == null || user.id() == null) {
+                throw new IllegalArgumentException("El usuario con ID " + command.userId() + " no existe en IAM.");
+            }
+        } catch (FeignException.NotFound e) {
+            throw new IllegalArgumentException("El usuario con ID " + command.userId() + " no existe en IAM.");
+        } catch (FeignException.Unauthorized e) {
+            throw new IllegalStateException("IAM respondió 401. Verifica que Profiles esté propagando el Bearer token.");
         }
 
-        // 2️⃣ Validar duplicado en pacientes
+        // 2) Validar duplicado en pacientes
         if (patientRepository.findByUserId(command.userId()).isPresent()) {
             throw new IllegalArgumentException("Ya existe un paciente asociado a ese usuario.");
         }
 
-        // 3️⃣ Validar duplicado cruzado (usuario es psicólogo)
+        // (Opcional) duplicado por DNI si tu modelo lo requiere
+        // if (patientRepository.findByDni(command.dni()).isPresent()) {
+        //     throw new IllegalArgumentException("Ya existe un paciente con ese DNI.");
+        // }
+
+        // 3) Validar duplicado cruzado (usuario ya es psicólogo)
         if (psychologistRepository.findByUserId(command.userId()).isPresent()) {
             throw new IllegalArgumentException("Ese usuario ya está registrado como psicólogo, no puede ser paciente.");
         }
 
-        // 4️⃣ Crear y guardar
+        // 4) Crear y guardar
         var patient = new Patient(
                 command.firstName(),
                 command.lastName(),

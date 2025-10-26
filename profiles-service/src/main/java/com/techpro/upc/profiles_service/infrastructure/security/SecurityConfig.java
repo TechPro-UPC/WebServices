@@ -85,12 +85,10 @@ class JwtAuthFilter extends OncePerRequestFilter {
 
         try {
             String token = header.substring(7);
-            String email = Jwts.parser()
-                    .verifyWith(key)
+            String email = String.valueOf(Jwts.parserBuilder()
+                    .setSigningKey(key)          // <- 0.11.x
                     .build()
-                    .parseSignedClaims(token)
-                    .getPayload()
-                    .getSubject();
+                    .parseClaimsJws(token));
 
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 var auth = new UsernamePasswordAuthenticationToken(email, null, null);

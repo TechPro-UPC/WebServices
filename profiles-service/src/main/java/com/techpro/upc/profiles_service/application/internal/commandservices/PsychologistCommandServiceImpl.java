@@ -6,6 +6,7 @@ import com.techpro.upc.profiles_service.domain.services.PsychologistCommandServi
 import com.techpro.upc.profiles_service.infrastructure.iam.IamClient;
 import com.techpro.upc.profiles_service.infrastructure.persistance.jpa.repositories.PatientRepository;
 import com.techpro.upc.profiles_service.infrastructure.persistance.jpa.repositories.PsychologistRepository;
+import feign.FeignException;
 import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -34,9 +35,15 @@ public class PsychologistCommandServiceImpl implements PsychologistCommandServic
     public Optional<Psychologist> handle(CreatePsychologistCommand command) {
 
         // 1️⃣ Validar existencia del usuario en IAM
-        ResponseEntity<?> userResponse = iamClient.getUserById(command.userId());
-        if (!userResponse.getStatusCode().is2xxSuccessful() || userResponse.getBody() == null) {
+        try {
+            var user = iamClient.getUserById(command.userId()); // <-- ahora es UserResource
+            if (user == null || user.id() == null) {
+                throw new IllegalArgumentException("El usuario con ID " + command.userId() + " no existe en el IAM Service.");
+            }
+        } catch (FeignException.NotFound e) {
             throw new IllegalArgumentException("El usuario con ID " + command.userId() + " no existe en el IAM Service.");
+        } catch (FeignException.Unauthorized e) {
+            throw new IllegalStateException("IAM respondió 401. Verifica que Profiles propague el Bearer token.");
         }
 
         // 2️⃣ Validar duplicado dentro de Psychologists

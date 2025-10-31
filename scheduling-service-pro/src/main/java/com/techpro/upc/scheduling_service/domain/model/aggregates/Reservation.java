@@ -24,7 +24,6 @@ public class Reservation extends AuditableAbstractAggregateRoot<Reservation> {
     @Column(nullable = false)
     private Long timeSlotId;
 
-
     protected Reservation() { } // requerido por JPA
 
     public Reservation(CreateReservationCommand command){

@@ -1,21 +1,21 @@
 package com.techpro.upc.profiles_service.domain.model.aggregates;
 
 import com.techpro.upc.profiles_service.domain.model.valueobjects.FullName;
+import com.techpro.upc.profiles_service.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+
 
 @Entity
 @Table(name = "patients")
-@EntityListeners(AuditingEntityListener.class)
+// Heredamos las características de JPA y los campos de Auditoría de la clase base
 @Getter
 @NoArgsConstructor
-public class Patient {
+public class Patient extends AuditableAbstractAggregateRoot<Patient> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    // Los campos id, createdAt, updatedAt se heredan de AuditableAbstractAggregateRoot
 
     @Embedded
     @AttributeOverrides({
@@ -37,7 +37,7 @@ public class Patient {
     @Column(name = "user_id", nullable = false, unique = true)
     private Long userId;
 
-    // Constructor principal de dominio
+    // Constructor principal de dominio (sin el ID, ya que lo maneja la clase base)
     public Patient(String firstName, String lastName, String dni, String phone, String gender, Long userId) {
         this.fullName = new FullName(firstName, lastName);
         this.dni = dni;

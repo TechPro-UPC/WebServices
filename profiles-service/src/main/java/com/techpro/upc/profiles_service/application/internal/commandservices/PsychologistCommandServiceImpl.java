@@ -3,7 +3,6 @@ package com.techpro.upc.profiles_service.application.internal.commandservices;
 import com.techpro.upc.profiles_service.domain.model.aggregates.Psychologist;
 import com.techpro.upc.profiles_service.domain.model.commands.CreatePsychologistCommand;
 import com.techpro.upc.profiles_service.domain.services.PsychologistCommandService;
-import com.techpro.upc.profiles_service.infrastructure.iam.IamClient;
 import com.techpro.upc.profiles_service.infrastructure.persistance.jpa.repositories.PatientRepository;
 import com.techpro.upc.profiles_service.infrastructure.persistance.jpa.repositories.PsychologistRepository;
 import feign.FeignException;
@@ -17,46 +16,35 @@ import java.util.Optional;
 public class PsychologistCommandServiceImpl implements PsychologistCommandService {
 
     private final PsychologistRepository psychologistRepository;
-    private final PatientRepository patientRepository; // 👈 NUEVO
-    private final IamClient iamClient;
+    private final PatientRepository patientRepository;
+
 
     public PsychologistCommandServiceImpl(
             PsychologistRepository psychologistRepository,
-            PatientRepository patientRepository, // 👈 INYECTAR AQUÍ
-            IamClient iamClient
+            PatientRepository patientRepository
+
     ) {
         this.psychologistRepository = psychologistRepository;
         this.patientRepository = patientRepository;
-        this.iamClient = iamClient;
     }
 
     @Override
     @Transactional
     public Optional<Psychologist> handle(CreatePsychologistCommand command) {
 
-        // 1️⃣ Validar existencia del usuario en IAM
-        try {
-            var user = iamClient.getUserById(command.userId()); // <-- ahora es UserResource
-            if (user == null || user.id() == null) {
-                throw new IllegalArgumentException("El usuario con ID " + command.userId() + " no existe en el IAM Service.");
-            }
-        } catch (FeignException.NotFound e) {
-            throw new IllegalArgumentException("El usuario con ID " + command.userId() + " no existe en el IAM Service.");
-        } catch (FeignException.Unauthorized e) {
-            throw new IllegalStateException("IAM respondió 401. Verifica que Profiles propague el Bearer token.");
-        }
+        // Confiamos en el userId del token.
 
-        // 2️⃣ Validar duplicado dentro de Psychologists
+        // 1️⃣ Validar duplicado dentro de Psychologists
         if (psychologistRepository.findByUserId(command.userId()).isPresent()) {
             throw new IllegalArgumentException("Ya existe un psicólogo asociado a ese usuario.");
         }
 
-        // 3️⃣ Validar duplicado cruzado en Patients
+        // 2️⃣ Validar duplicado cruzado en Patients
         if (patientRepository.findByUserId(command.userId()).isPresent()) {
             throw new IllegalArgumentException("Ese usuario ya está registrado como paciente, no puede ser psicólogo.");
         }
 
-        // 4️⃣ Validar DNI o licencia duplicada
+        // 3️⃣ Validar DNI o licencia duplicada (Reglas de negocio correctas)
         if (psychologistRepository.findByDni(command.dni()).isPresent()) {
             throw new IllegalArgumentException("El DNI ya está registrado en otro psicólogo.");
         }
@@ -64,7 +52,7 @@ public class PsychologistCommandServiceImpl implements PsychologistCommandServic
             throw new IllegalArgumentException("El número de licencia ya está registrado.");
         }
 
-        // 5️⃣ Crear y guardar
+        // 4️⃣ Crear y guardar
         var psychologist = new Psychologist(
                 command.firstName(),
                 command.lastName(),

@@ -64,7 +64,8 @@ public class WebSecurityConfiguration {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors(configurer -> configurer.configurationSource(_ -> {
+        // 🎯 LÍNEA CORREGIDA: Se reemplazó "_" por "ignored"
+        http.cors(configurer -> configurer.configurationSource(ignored -> {
             var cors = new CorsConfiguration();
             cors.setAllowedOrigins(List.of("*"));
             cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));

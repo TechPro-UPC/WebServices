@@ -1,61 +1,51 @@
 package com.techpro.upc.profiles_service.domain.model.aggregates;
 
 import com.techpro.upc.profiles_service.domain.model.valueobjects.FullName;
+import com.techpro.upc.profiles_service.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "psychologists")
 @Getter
-@Setter
 @NoArgsConstructor
-public class Psychologist {
+public class Psychologist extends AuditableAbstractAggregateRoot<Psychologist> {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    // Los campos id, createdAt, updatedAt se heredan
 
-    @NotBlank
-    @Size(max = 50)
-    @Column(name = "first_name")
-    private String firstName;
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "firstName", column = @Column(name = "first_name")),
+            @AttributeOverride(name = "lastName", column = @Column(name = "last_name"))
+    })
+    private FullName fullName;
 
-    @NotBlank
-    @Size(max = 50)
-    @Column(name = "last_name")
-    private String lastName;
-
-    @NotBlank
-    @Size(min = 8, max = 8)
+    @Column(nullable = false, unique = true, length = 8)
     private String dni;
 
-    @Size(max = 15)
+    @Column(length = 20)
     private String phone;
 
+    @Column(length = 10)
     private String gender;
 
-    @NotBlank
-    @Size(min = 6, max = 10)
-    @Column(name = "license_number", unique = true, length = 10)
+    @Column(name = "license_number", unique = true, length = 10, nullable = false)
     private String licenseNumber;
 
-    @Size(max = 100)
+    @Column(length = 100)
     private String specialization;
 
-    @Column(name = "user_id", unique = true)
+    @Column(name = "user_id", unique = true, nullable = false)
     private Long userId;
 
     public Psychologist(String firstName, String lastName, String dni,
                         String phone, String gender,
                         String licenseNumber, String specialization, Long userId) {
-        this.firstName = firstName;
-        this.lastName = lastName;
+
+        // 🎯 Usamos el Value Object
+        this.fullName = new FullName(firstName, lastName);
+
         this.dni = dni;
         this.phone = phone;
         this.gender = gender;
@@ -63,4 +53,9 @@ public class Psychologist {
         this.specialization = specialization;
         this.userId = userId;
     }
+
+    // Métodos de conveniencia del dominio
+    public String getFirstName() { return fullName.getFirstName(); }
+    public String getLastName() { return fullName.getLastName(); }
+    public String getFullName() { return fullName.getFullName(); }
 }

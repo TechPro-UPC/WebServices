@@ -1,55 +1,55 @@
 package com.techpro.upc.profiles_service.infrastructure.configuration;
 
-import com.techpro.upc.profiles_service.infrastructure.messaging.Receiver;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
-import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
-import org.springframework.amqp.rabbit.listener.adapter.MessageListenerAdapter;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitConfig {
 
-    public static final String TOPIC_EXCHANGE_NAME = "spring-boot-exchange";
-    public static final String QUEUE_NAME = "spring-boot";
+    public static final String PROFILE_EXCHANGE = "profile.exchange";
+    public static final String PROFILE_CREATED_QUEUE = "profile.created.queue";
+    public static final String PROFILE_CREATED_ROUTING_KEY = "profile.created";
 
     @Bean
-    public Queue queue() {
-        return new Queue(QUEUE_NAME, false);
+    public TopicExchange profileExchange() {
+        return new TopicExchange(PROFILE_EXCHANGE);
     }
 
     @Bean
-    public TopicExchange exchange() {
-        return new TopicExchange(TOPIC_EXCHANGE_NAME);
+    public Queue profileCreatedQueue() {
+        // durable = true para que la cola sobreviva reinicios del broker
+        return new Queue(PROFILE_CREATED_QUEUE, true);
     }
 
     @Bean
-    public Binding binding(Queue queue, TopicExchange exchange) {
+    public Binding profileCreatedBinding() {
         return BindingBuilder
-                .bind(queue)
-                .to(exchange)
-                .with("foo.bar.#");
+                .bind(profileCreatedQueue())
+                .to(profileExchange())
+                .with(PROFILE_CREATED_ROUTING_KEY);
     }
 
     @Bean
-    public SimpleMessageListenerContainer container(
-            ConnectionFactory connectionFactory,
-            MessageListenerAdapter listenerAdapter
-    ) {
-        SimpleMessageListenerContainer container =
-                new SimpleMessageListenerContainer();
-        container.setConnectionFactory(connectionFactory);
-        container.setQueueNames(QUEUE_NAME);
-        container.setMessageListener(listenerAdapter);
-        return container;
+    public MessageConverter jacksonMessageConverter() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        return new Jackson2JsonMessageConverter(mapper);
     }
 
     @Bean
-    public MessageListenerAdapter listenerAdapter(Receiver receiver) {
-        return new MessageListenerAdapter(receiver, "receiveMessage");
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory,
+                                         MessageConverter messageConverter) {
+        RabbitTemplate template = new RabbitTemplate(connectionFactory);
+        template.setMessageConverter(messageConverter);
+        return template;
     }
 }

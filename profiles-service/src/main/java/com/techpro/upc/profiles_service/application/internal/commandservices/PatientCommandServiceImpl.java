@@ -5,6 +5,7 @@ import com.techpro.upc.profiles_service.domain.model.commands.CreatePatientComma
 import com.techpro.upc.profiles_service.domain.services.PatientCommandService;
 import com.techpro.upc.profiles_service.infrastructure.persistance.jpa.repositories.PatientRepository;
 import com.techpro.upc.profiles_service.infrastructure.persistance.jpa.repositories.PsychologistRepository;
+import feign.FeignException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 

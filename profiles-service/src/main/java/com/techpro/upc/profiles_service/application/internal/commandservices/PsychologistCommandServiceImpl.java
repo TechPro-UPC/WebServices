@@ -5,6 +5,7 @@ import com.techpro.upc.profiles_service.domain.model.commands.CreatePsychologist
 import com.techpro.upc.profiles_service.domain.services.PsychologistCommandService;
 import com.techpro.upc.profiles_service.infrastructure.persistance.jpa.repositories.PatientRepository;
 import com.techpro.upc.profiles_service.infrastructure.persistance.jpa.repositories.PsychologistRepository;
+import feign.FeignException;
 import jakarta.transaction.Transactional;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;

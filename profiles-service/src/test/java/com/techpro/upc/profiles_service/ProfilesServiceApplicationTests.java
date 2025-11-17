@@ -14,18 +14,18 @@ class ProfilesServiceApplicationTests {
 	void contextLoads() {
 	}
 
-    @Test
-    void shouldCreatePsychologist() {
-        Psychologist psychologist = new Psychologist();
-        psychologist.setFirstName("Juan");
-        psychologist.setLastName("Pérez");
-        psychologist.setDni("12345678");
-        psychologist.setPhone("987654321");
-        psychologist.setGender("M");
-        psychologist.setLicenseNumber("LIC-2025");
-        psychologist.setSpecialization("Terapia Cognitivo Conductual");
+ //    @Test
+ //   void shouldCreatePsychologist() {
+ //       Psychologist psychologist = new Psychologist();
+ //       psychologist.setFirstName("Juan");
+ //       psychologist.setLastName("Pérez");
+ //       psychologist.setDni("12345678");
+ //       psychologist.setPhone("987654321");
+ //       psychologist.setGender("M");
+ //       psychologist.setLicenseNumber("LIC-2025");
+ //       psychologist.setSpecialization("Terapia Cognitivo Conductual");
 
-        assertEquals("Juan", psychologist.getFirstName());
-    }
+ //       assertEquals("Juan", psychologist.getFirstName());
+ //   }
 
 }

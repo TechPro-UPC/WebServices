@@ -21,17 +21,17 @@ public class Psychologist {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
+    // ELIMINADO: @NotBlank (El nombre no existe al momento del registro inicial)
     @Size(max = 50)
     @Column(name = "first_name")
     private String firstName;
 
-    @NotBlank
+    // ELIMINADO: @NotBlank
     @Size(max = 50)
     @Column(name = "last_name")
     private String lastName;
 
-    @NotBlank
+    // ELIMINADO: @NotBlank
     @Size(min = 8, max = 8)
     private String dni;
 
@@ -40,7 +40,8 @@ public class Psychologist {
 
     private String gender;
 
-    @NotBlank
+    // ELIMINADO: @NotBlank
+    // Aún es único, pero permite null temporalmente hasta que el psicólogo suba su licencia
     @Size(min = 6, max = 10)
     @Column(name = "license_number", unique = true, length = 10)
     private String licenseNumber;
@@ -48,9 +49,17 @@ public class Psychologist {
     @Size(max = 100)
     private String specialization;
 
-    @Column(name = "user_id", unique = true)
+    // Este campo SÍ es obligatorio, es el vínculo con el IAM
+    @Column(name = "user_id", unique = true, nullable = false)
     private Long userId;
 
+    // --- NUEVO: Constructor Mínimo para RabbitMQ ---
+    // Este es el que usa el Listener cuando llega el evento "UserRegistered"
+    public Psychologist(Long userId) {
+        this.userId = userId;
+    }
+
+    // Constructor completo (Útil para Tests o Seeds)
     public Psychologist(String firstName, String lastName, String dni,
                         String phone, String gender,
                         String licenseNumber, String specialization, Long userId) {
@@ -62,5 +71,17 @@ public class Psychologist {
         this.licenseNumber = licenseNumber;
         this.specialization = specialization;
         this.userId = userId;
+    }
+
+    // --- NUEVO: Metodo de Negocio ---
+    // Usa este metodo cuando el psicólogo entre a "Editar Perfil" para llenar sus datos
+    public void updateProfile(String firstName, String lastName, String dni, String phone, String gender, String licenseNumber, String specialization) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.dni = dni;
+        this.phone = phone;
+        this.gender = gender;
+        this.licenseNumber = licenseNumber;
+        this.specialization = specialization;
     }
 }

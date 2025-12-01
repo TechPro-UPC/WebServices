@@ -1,5 +1,6 @@
 package com.techpro.upc.iam_service.domain.model.aggregates;
 
+import com.techpro.upc.iam_service.domain.model.events.UserRegisteredEvent;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -38,10 +39,10 @@ public class User extends AbstractAggregateRoot<User> {
 
     public User() {}
 
-    public User(String email, String password, Role rol) {
+    public User(String email, String password, Role role) {
         this.email = email;
         this.password = password;
-        this.role = rol;
+        this.role = role;
     }
 
 

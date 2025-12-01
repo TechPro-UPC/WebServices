@@ -11,6 +11,7 @@ import org.springframework.data.domain.AbstractAggregateRoot;
 @Getter
 @Setter
 @Entity
+@Table(name = "users")
 public class User extends AbstractAggregateRoot<User> {
 
     @Id

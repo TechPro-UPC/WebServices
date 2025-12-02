@@ -7,9 +7,15 @@ import com.techpro.upc.profiles_service.domain.model.queries.GetPsychologistById
 import com.techpro.upc.profiles_service.domain.model.queries.GetPsychologistByUserIdQuery;
 import com.techpro.upc.profiles_service.interfaces.rest.resources.CreatePsychologistResource;
 import com.techpro.upc.profiles_service.interfaces.rest.resources.PsychologistResource;
+import com.techpro.upc.profiles_service.interfaces.rest.resources.UpdatePsychologistResource;
 import com.techpro.upc.profiles_service.interfaces.rest.transform.CreatePsychologistCommandFromResourceAssembler;
 import com.techpro.upc.profiles_service.interfaces.rest.transform.PsychologistResourceFromEntityAssembler;
+import com.techpro.upc.profiles_service.interfaces.rest.transform.UpdatePsychologistCommandFromResourceAssembler;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,14 +36,26 @@ public class PsychologistController {
         this.psychologistQueryService = psychologistQueryService;
     }
 
-    @PostMapping
-    public ResponseEntity<PsychologistResource> createPsychologist(@RequestBody CreatePsychologistResource resource) {
-        var command = CreatePsychologistCommandFromResourceAssembler.toCommandFromResource(resource);
+    // --- CAMBIO: De POST a PUT ---
+    @Operation(summary = "Update psychologist profile", description = "Completes the psychologist profile information")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Psychologist updated successfully"),
+            @ApiResponse(responseCode = "404", description = "Psychologist not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid request")
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<PsychologistResource> updatePsychologist(@PathVariable Long id, @Valid @RequestBody UpdatePsychologistResource resource) {
+        // Transformamos el resource + ID al comando de actualización
+        var command = UpdatePsychologistCommandFromResourceAssembler.toCommandFromResource(id, resource);
+
         var psychologist = psychologistCommandService.handle(command);
+
         return psychologist
-                .map(entity -> new ResponseEntity<>(PsychologistResourceFromEntityAssembler.toResourceFromEntity(entity), HttpStatus.CREATED))
-                .orElseGet(() -> ResponseEntity.badRequest().build());
+                .map(entity -> ResponseEntity.ok(PsychologistResourceFromEntityAssembler.toResourceFromEntity(entity)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    // --- GETs se mantienen igual ---
 
     @GetMapping
     public List<PsychologistResource> getAllPsychologists() {

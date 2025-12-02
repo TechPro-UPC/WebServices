@@ -2,6 +2,7 @@ package com.techpro.upc.profiles_service.application.internal.commandservices;
 
 import com.techpro.upc.profiles_service.domain.model.aggregates.Psychologist;
 import com.techpro.upc.profiles_service.domain.model.commands.CreatePsychologistCommand;
+import com.techpro.upc.profiles_service.domain.model.commands.UpdatePsychologistCommand;
 import com.techpro.upc.profiles_service.domain.services.PsychologistCommandService;
 import com.techpro.upc.profiles_service.infrastructure.iam.IamClient;
 import com.techpro.upc.profiles_service.infrastructure.persistance.jpa.repositories.PatientRepository;
@@ -17,66 +18,44 @@ import java.util.Optional;
 public class PsychologistCommandServiceImpl implements PsychologistCommandService {
 
     private final PsychologistRepository psychologistRepository;
-    private final PatientRepository patientRepository; // 👈 NUEVO
-    private final IamClient iamClient;
 
-    public PsychologistCommandServiceImpl(
-            PsychologistRepository psychologistRepository,
-            PatientRepository patientRepository, // 👈 INYECTAR AQUÍ
-            IamClient iamClient
-    ) {
+    // Ya no necesitamos IamClient ni PatientRepository porque el perfil ya existe
+    public PsychologistCommandServiceImpl(PsychologistRepository psychologistRepository) {
         this.psychologistRepository = psychologistRepository;
-        this.patientRepository = patientRepository;
-        this.iamClient = iamClient;
     }
 
     @Override
-    @Transactional
-    public Optional<Psychologist> handle(CreatePsychologistCommand command) {
+    public Optional<Psychologist> handle(UpdatePsychologistCommand command) {
 
-        // 1️⃣ Validar existencia del usuario en IAM
-        try {
-            var user = iamClient.getUserById(command.userId()); // <-- ahora es UserResource
-            if (user == null || user.id() == null) {
-                throw new IllegalArgumentException("El usuario con ID " + command.userId() + " no existe en el IAM Service.");
-            }
-        } catch (FeignException.NotFound e) {
-            throw new IllegalArgumentException("El usuario con ID " + command.userId() + " no existe en el IAM Service.");
-        } catch (FeignException.Unauthorized e) {
-            throw new IllegalStateException("IAM respondió 401. Verifica que Profiles propague el Bearer token.");
+        // 1. Buscar el perfil "cascarón" que creó RabbitMQ
+        var result = psychologistRepository.findById(command.id());
+        if (result.isEmpty()) {
+            throw new IllegalArgumentException("El perfil de psicólogo con ID " + command.id() + " no existe.");
         }
 
-        // 2️⃣ Validar duplicado dentro de Psychologists
-        if (psychologistRepository.findByUserId(command.userId()).isPresent()) {
-            throw new IllegalArgumentException("Ya existe un psicólogo asociado a ese usuario.");
+        // 2. Validaciones de Negocio (Duplicados)
+        if (psychologistRepository.existsByDniAndIdNot(command.dni(), command.id())) {
+            throw new IllegalArgumentException("El DNI " + command.dni() + " ya está registrado por otro psicólogo.");
+        }
+        if (psychologistRepository.existsByLicenseNumberAndIdNot(command.licenseNumber(), command.id())) {
+            throw new IllegalArgumentException("El número de licencia " + command.licenseNumber() + " ya está registrado.");
         }
 
-        // 3️⃣ Validar duplicado cruzado en Patients
-        if (patientRepository.findByUserId(command.userId()).isPresent()) {
-            throw new IllegalArgumentException("Ese usuario ya está registrado como paciente, no puede ser psicólogo.");
-        }
+        var psychologistToUpdate = result.get();
 
-        // 4️⃣ Validar DNI o licencia duplicada
-        if (psychologistRepository.findByDni(command.dni()).isPresent()) {
-            throw new IllegalArgumentException("El DNI ya está registrado en otro psicólogo.");
-        }
-        if (psychologistRepository.findByLicenseNumber(command.licenseNumber()).isPresent()) {
-            throw new IllegalArgumentException("El número de licencia ya está registrado.");
-        }
-
-        // 5️⃣ Crear y guardar
-        var psychologist = new Psychologist(
+        // 3. Actualizar datos usando el método de dominio
+        psychologistToUpdate.updateProfile(
                 command.firstName(),
                 command.lastName(),
                 command.dni(),
                 command.phone(),
                 command.gender(),
                 command.licenseNumber(),
-                command.specialization(),
-                command.userId()
+                command.specialization()
         );
 
-        var saved = psychologistRepository.save(psychologist);
+        // 4. Guardar
+        var saved = psychologistRepository.save(psychologistToUpdate);
         return Optional.of(saved);
     }
 }

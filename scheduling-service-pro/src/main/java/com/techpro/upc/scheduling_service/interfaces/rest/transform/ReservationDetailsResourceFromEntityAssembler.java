@@ -26,7 +26,8 @@ public class ReservationDetailsResourceFromEntityAssembler {
             if (psychologist != null) {
                 psycologistDto = new PsycologistDto(
                         psychologist.id(),
-                        null,
+                        psychologist.firstName(),
+                        psychologist.lastName(),
                         psychologist.licenseNumber()
                 );
             }

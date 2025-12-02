@@ -54,9 +54,8 @@ public class TimeSlotController {
             @ApiResponse(responseCode = "404", description = "TimeSlot not found")
     })
     public ResponseEntity<TimeSlotResource> getTimeSlotById(@PathVariable Long id) {
-        // ✅ usar el query correcto
         var query = new GetTimeSlotByIdQuery(id);
-        var result = timeSlotQueryService.handle(query); // Optional<TimeSlot>
+        var result = timeSlotQueryService.handle(query);
         if (result.isEmpty()) return ResponseEntity.notFound().build();
         var resource = TimeSlotResourceFromEntityAssembler.toResourceFromEntity(result.get());
         return ResponseEntity.ok(resource);
@@ -69,7 +68,7 @@ public class TimeSlotController {
             @ApiResponse(responseCode = "404", description = "TimeSlots not found")
     })
     public ResponseEntity<List<TimeSlotResource>> getAllTimeSlots() {
-        var timeSlots = timeSlotQueryService.handle(new GetAllTimeSlotsQuery()); // List<TimeSlot>
+        var timeSlots = timeSlotQueryService.handle(new GetAllTimeSlotsQuery());
         if (timeSlots.isEmpty()) return ResponseEntity.notFound().build();
         var resources = timeSlots.stream()
                 .map(TimeSlotResourceFromEntityAssembler::toResourceFromEntity)

@@ -1,5 +1,6 @@
 package com.techpro.upc.profiles_service.infrastructure.security;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
@@ -7,7 +8,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,6 +25,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
@@ -43,9 +44,9 @@ public class SecurityConfig {
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
-                                "/api/v1/patients/**",
-                                "/api/v1/psychologists/**"
-                        ).permitAll() // temporalmente abierto
+                                "/api/v1/patients/**",      // Ruta Pública
+                                "/api/v1/psychologists/**"  // Ruta Pública
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter(), UsernamePasswordAuthenticationFilter.class);
@@ -64,6 +65,9 @@ public class SecurityConfig {
     }
 }
 
+/**
+ * Filtro interno para validar JWT
+ */
 class JwtAuthFilter extends OncePerRequestFilter {
 
     private final SecretKey key;
@@ -78,6 +82,8 @@ class JwtAuthFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         final String header = request.getHeader("Authorization");
+
+        // 1. Si no hay token, continuamos sin autenticar (Spring decidirá si pasa por permitAll)
         if (header == null || !header.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -85,19 +91,31 @@ class JwtAuthFilter extends OncePerRequestFilter {
 
         try {
             String token = header.substring(7);
-            String email = String.valueOf(Jwts.parserBuilder()
-                    .setSigningKey(key)          // <- 0.11.x
+
+            // 2. CORRECCIÓN: Parsear correctamente el Body para sacar el Subject (email)
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
                     .build()
-                    .parseClaimsJws(token));
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            String email = claims.getSubject();
 
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                var auth = new UsernamePasswordAuthenticationToken(email, null, null);
+                // Creamos la autenticación con lista vacía de roles (o extraes roles de claims si los tienes)
+                var auth = new UsernamePasswordAuthenticationToken(email, null, Collections.emptyList());
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
+
         } catch (Exception e) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired token");
-            return;
+            // 3. CORRECCIÓN CRÍTICA:
+            // Si el token falla (expirado, firma mal, etc), NO lanzamos error 401 aquí.
+            // Limpiamos el contexto y dejamos que la petición siga.
+            // Si la ruta era "/api/v1/patients" (pública), pasará.
+            // Si era privada, Spring Security devolverá 403 más adelante.
+            SecurityContextHolder.clearContext();
+            System.out.println("JWT inválido o expirado, continuando como anónimo: " + e.getMessage());
         }
 
         filterChain.doFilter(request, response);

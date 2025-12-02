@@ -4,6 +4,6 @@ public record ReservationResource(
         Long id,
         Long patientId,
         Long psycologistId,
-        Long paymentId,
-        Long timeSlotId
+        Long timeSlotId,
+        Long paymentId
 ) {}

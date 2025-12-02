@@ -9,7 +9,7 @@ public record ReservationDetailsResource(
         Long id,
         Long patientId,
         PsycologistDto psycologist,
-        PaymentResource payment,
-        TimeSlotResource timeSlot
+        TimeSlotResource timeSlot,
+        Long paymentId
 ) {
 }

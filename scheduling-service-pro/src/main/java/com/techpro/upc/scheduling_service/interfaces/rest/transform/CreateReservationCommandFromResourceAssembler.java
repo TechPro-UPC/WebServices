@@ -8,8 +8,8 @@ public class CreateReservationCommandFromResourceAssembler {
         return new CreateReservationCommand(
                 resource.patientId(),
                 resource.psycologistId(),
-                resource.paymentId(),
-                resource.timeSlotId()
+                resource.timeSlotId(),
+                resource.paymentId()
 
         );
     }

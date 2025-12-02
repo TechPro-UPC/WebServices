@@ -24,18 +24,23 @@ public class Reservation extends AuditableAbstractAggregateRoot<Reservation> {
     @Column(nullable = false)
     private Long timeSlotId;
 
+
+
+
     protected Reservation() { } // requerido por JPA
 
     public Reservation(CreateReservationCommand command){
         this.patientId     = command.patientId();
         this.psycologistId = command.psycologistId();
-        this.paymentId     = command.paymentId();
         this.timeSlotId    = command.timeSlotId();
+        this.patientId = command.patientId();
+        this.paymentId = command.paymentId();
     }
 
     public Long getId() { return id; }
     public Long getPatientId() { return patientId; }
     public Long getPsycologistId() { return psycologistId; }
-    public Long getPaymentId() { return paymentId; }
     public Long getTimeSlotId() { return timeSlotId; }
+    public Long getPaymentId() { return paymentId; }
+
 }

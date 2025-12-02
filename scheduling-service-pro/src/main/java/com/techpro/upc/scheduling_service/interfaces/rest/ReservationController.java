@@ -3,7 +3,6 @@ package com.techpro.upc.scheduling_service.interfaces.rest;
 import com.techpro.upc.scheduling_service.application.internal.outboundservices.profiles.PsychologistContextFacade;
 import com.techpro.upc.scheduling_service.domain.model.queries.GetAllReservationsQuery;
 import com.techpro.upc.scheduling_service.domain.model.queries.GetReservationByIdQuery;
-import com.techpro.upc.scheduling_service.domain.services.PaymentQueryService;
 import com.techpro.upc.scheduling_service.domain.services.ReservationCommandService;
 import com.techpro.upc.scheduling_service.domain.services.ReservationQueryService;
 import com.techpro.upc.scheduling_service.domain.services.TimeSlotQueryService;
@@ -38,18 +37,15 @@ public class ReservationController {
     // Facades / servicios externos usados para armar los "details"
     private final PsychologistContextFacade psychologistContextFacade;
     private final TimeSlotQueryService timeSlotQueryService;
-    private final PaymentQueryService paymentQueryService;
 
     public ReservationController(ReservationCommandService reservationCommandService,
                                  ReservationQueryService reservationQueryService,
                                  PsychologistContextFacade psychologistContextFacade,
-                                 TimeSlotQueryService timeSlotQueryService,
-                                 PaymentQueryService paymentQueryService) {
+                                 TimeSlotQueryService timeSlotQueryService) {
         this.reservationCommandService = reservationCommandService;
         this.reservationQueryService = reservationQueryService;
         this.psychologistContextFacade = psychologistContextFacade;
         this.timeSlotQueryService = timeSlotQueryService;
-        this.paymentQueryService = paymentQueryService;
     }
 
     /**
@@ -125,8 +121,7 @@ public class ReservationController {
         var detailsResource = ReservationDetailsResourceFromEntityAssembler.toResourceFromEntity(
                 reservation.get(),
                 psychologistContextFacade,
-                timeSlotQueryService,
-                paymentQueryService
+                timeSlotQueryService
         );
 
         return ResponseEntity.ok(detailsResource);
@@ -153,8 +148,7 @@ public class ReservationController {
                 .map(res -> ReservationDetailsResourceFromEntityAssembler.toResourceFromEntity(
                         res,
                         psychologistContextFacade,
-                        timeSlotQueryService,
-                        paymentQueryService
+                        timeSlotQueryService
                 ))
                 .toList();
 

@@ -2,6 +2,7 @@ package com.techpro.upc.profiles_service.application.internal.commandservices;
 
 import com.techpro.upc.profiles_service.domain.model.aggregates.Patient;
 import com.techpro.upc.profiles_service.domain.model.commands.CreatePatientCommand;
+import com.techpro.upc.profiles_service.domain.model.commands.UpdatePatientCommand;
 import com.techpro.upc.profiles_service.domain.services.PatientCommandService;
 import com.techpro.upc.profiles_service.infrastructure.iam.IamClient;
 import com.techpro.upc.profiles_service.infrastructure.persistance.jpa.repositories.PatientRepository;
@@ -16,59 +17,40 @@ import java.util.Optional;
 public class PatientCommandServiceImpl implements PatientCommandService {
 
     private final PatientRepository patientRepository;
-    private final PsychologistRepository psychologistRepository;
-    private final IamClient iamClient;
 
-    public PatientCommandServiceImpl(PatientRepository patientRepository,
-                                     PsychologistRepository psychologistRepository,
-                                     IamClient iamClient) {
+    // Eliminamos IamClient y PsychologistRepository porque el perfil ya fue creado por RabbitMQ
+    public PatientCommandServiceImpl(PatientRepository patientRepository) {
         this.patientRepository = patientRepository;
-        this.psychologistRepository = psychologistRepository;
-        this.iamClient = iamClient;
     }
 
     @Override
-    @Transactional
-    public Optional<Patient> handle(CreatePatientCommand command) {
+    public Optional<Patient> handle(UpdatePatientCommand command) {
+        // 1. Buscamos el perfil "cascarón" que creó RabbitMQ
+        var result = patientRepository.findById(command.id());
 
-        // 1) Validar que el usuario exista en IAM
-        try {
-            var user = iamClient.getUserById(command.userId());
-            if (user == null || user.id() == null) {
-                throw new IllegalArgumentException("El usuario con ID " + command.userId() + " no existe en IAM.");
-            }
-        } catch (FeignException.NotFound e) {
-            throw new IllegalArgumentException("El usuario con ID " + command.userId() + " no existe en IAM.");
-        } catch (FeignException.Unauthorized e) {
-            throw new IllegalStateException("IAM respondió 401. Verifica que Profiles esté propagando el Bearer token.");
+        if (result.isEmpty()) {
+            throw new IllegalArgumentException("El perfil de paciente con ID " + command.id() + " no existe.");
         }
 
-        // 2) Validar duplicado en pacientes
-        if (patientRepository.findByUserId(command.userId()).isPresent()) {
-            throw new IllegalArgumentException("Ya existe un paciente asociado a ese usuario.");
+        var patientToUpdate = result.get();
+
+        // 2. Validar que el DNI no esté siendo usado por OTRO paciente
+        var patientWithSameDni = patientRepository.findByDni(command.dni());
+        if (patientWithSameDni.isPresent() && !patientWithSameDni.get().getId().equals(command.id())) {
+            throw new IllegalArgumentException("El DNI " + command.dni() + " ya está registrado por otro paciente.");
         }
 
-        // (Opcional) duplicado por DNI si tu modelo lo requiere
-        // if (patientRepository.findByDni(command.dni()).isPresent()) {
-        //     throw new IllegalArgumentException("Ya existe un paciente con ese DNI.");
-        // }
-
-        // 3) Validar duplicado cruzado (usuario ya es psicólogo)
-        if (psychologistRepository.findByUserId(command.userId()).isPresent()) {
-            throw new IllegalArgumentException("Ese usuario ya está registrado como psicólogo, no puede ser paciente.");
-        }
-
-        // 4) Crear y guardar
-        var patient = new Patient(
+        // 3. Actualizamos los datos usando el metodo de dominio
+        patientToUpdate.updateProfile(
                 command.firstName(),
                 command.lastName(),
                 command.dni(),
                 command.phone(),
-                command.gender(),
-                command.userId()
+                command.gender()
         );
 
-        var saved = patientRepository.save(patient);
-        return Optional.of(saved);
+        // 4. Guardamos los cambios
+        var updatedPatient = patientRepository.save(patientToUpdate);
+        return Optional.of(updatedPatient);
     }
 }

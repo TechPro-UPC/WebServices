@@ -8,8 +8,10 @@ import com.techpro.upc.profiles_service.domain.services.PatientCommandService;
 import com.techpro.upc.profiles_service.domain.services.PatientQueryService;
 import com.techpro.upc.profiles_service.interfaces.rest.resources.CreatePatientResource;
 import com.techpro.upc.profiles_service.interfaces.rest.resources.PatientResource;
+import com.techpro.upc.profiles_service.interfaces.rest.resources.UpdatePatientResource;
 import com.techpro.upc.profiles_service.interfaces.rest.transform.CreatePatientCommandFromResourceAssembler;
 import com.techpro.upc.profiles_service.interfaces.rest.transform.PatientResourceFromEntityAssembler;
+import com.techpro.upc.profiles_service.interfaces.rest.transform.UpdatePatientCommandFromResourceAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -37,21 +39,25 @@ public class PatientsController {
         this.patientQueryService = patientQueryService;
     }
 
-    @Operation(summary = "Create a new patient", description = "Registers a new patient in the system")
+    // --- CAMBIO: De POST (Create) a PUT (Update) ---
+    @Operation(summary = "Update patient profile", description = "Completes the patient profile information")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Patient created successfully"),
+            @ApiResponse(responseCode = "200", description = "Patient updated successfully"),
+            @ApiResponse(responseCode = "404", description = "Patient not found"),
             @ApiResponse(responseCode = "400", description = "Invalid request")
     })
-    @PostMapping
-    public ResponseEntity<PatientResource> createPatient(@Valid @RequestBody CreatePatientResource resource) {
-        var command = CreatePatientCommandFromResourceAssembler.toCommandFromResource(resource);
+    @PutMapping("/{id}")
+    public ResponseEntity<PatientResource> updatePatient(@PathVariable Long id, @Valid @RequestBody UpdatePatientResource resource) {
 
+        var command = UpdatePatientCommandFromResourceAssembler.toCommandFromResource(id, resource);
         Optional<Patient> patient = patientCommandService.handle(command);
 
         return patient
-                .map(value -> new ResponseEntity<>(PatientResourceFromEntityAssembler.toResourceFromEntity(value), CREATED))
-                .orElseGet(() -> ResponseEntity.badRequest().build());
+                .map(value -> ResponseEntity.ok(PatientResourceFromEntityAssembler.toResourceFromEntity(value)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    // --- Los métodos GET se mantienen igual ---
 
     @Operation(summary = "Get a patient by ID", description = "Retrieve a patient by its ID")
     @ApiResponses(value = {

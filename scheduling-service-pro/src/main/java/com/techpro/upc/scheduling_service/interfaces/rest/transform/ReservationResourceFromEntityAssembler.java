@@ -10,7 +10,7 @@ public class ReservationResourceFromEntityAssembler {
         return new ReservationResource(
                 reservation.getId(),
                 reservation.getPatientId(),
-                reservation.getPsycologistId(),
+                reservation.getPsychologistId(),
                 reservation.getPaymentId(),
                 reservation.getTimeSlotId()
         );

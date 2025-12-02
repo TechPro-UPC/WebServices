@@ -24,18 +24,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * ReservationController
- */
 @RestController
-@RequestMapping(value = "/api/v1/reservationsDetails", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api/v1/reservations", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Reservations", description = "Available Reservation Endpoints")
 public class ReservationController {
 
     private final ReservationCommandService reservationCommandService;
     private final ReservationQueryService reservationQueryService;
-
-    // Facades / servicios externos usados para armar los "details"
     private final PsychologistContextFacade psychologistContextFacade;
     private final TimeSlotQueryService timeSlotQueryService;
     private final PaymentQueryService paymentQueryService;
@@ -52,9 +47,6 @@ public class ReservationController {
         this.paymentQueryService = paymentQueryService;
     }
 
-    /**
-     * Create a new reservation
-     */
     @PostMapping
     @Operation(summary = "Create a new reservation")
     @ApiResponses(value = {
@@ -69,9 +61,6 @@ public class ReservationController {
         return new ResponseEntity<>(reservationResource, HttpStatus.CREATED);
     }
 
-    /**
-     * Get a reservation by ID
-     */
     @GetMapping("/{reservationId}")
     @Operation(summary = "Get a reservation by ID")
     @ApiResponses(value = {
@@ -86,9 +75,6 @@ public class ReservationController {
         return ResponseEntity.ok(reservationResource);
     }
 
-    /**
-     * Get all reservations
-     */
     @GetMapping
     @Operation(summary = "Get all reservations")
     @ApiResponses(value = {
@@ -106,9 +92,10 @@ public class ReservationController {
     }
 
     /**
-     * Get detailed reservation information (one)
+     * Endpoint for detailed reservation info (aggregating external data).
+     * Note: Changed path to avoid conflict and follow REST best practices.
      */
-    @GetMapping("/details/{reservationId}")
+    @GetMapping("/{reservationId}/details")
     @Operation(summary = "Get detailed reservation information")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Reservation details found"),
@@ -132,20 +119,13 @@ public class ReservationController {
         return ResponseEntity.ok(detailsResource);
     }
 
-    /**
-     * Get all reservations with full detail
-     */
     @GetMapping("/details")
-    @Operation(
-            summary = "Get detailed information for all reservations",
-            description = "Returns every reservation along with provider, worker, time-slot and payment data"
-    )
+    @Operation(summary = "Get detailed information for all reservations")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Reservation details found"),
             @ApiResponse(responseCode = "404", description = "No reservations found")
     })
     public ResponseEntity<List<ReservationDetailsResource>> getAllReservationDetails() {
-
         var reservations = reservationQueryService.handle(new GetAllReservationsQuery());
         if (reservations.isEmpty()) return ResponseEntity.notFound().build();
 

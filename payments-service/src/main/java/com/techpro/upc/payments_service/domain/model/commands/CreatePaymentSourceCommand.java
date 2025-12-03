@@ -5,5 +5,9 @@ import com.techpro.upc.payments_service.domain.valueObjects.PaymentStatus;
 
 import java.math.BigDecimal;
 
-public record CreatePaymentSourceCommand(Money totalAmount, PaymentStatus status) {
+public record CreatePaymentSourceCommand(
+        Long userId,          // ⚠️ NUEVO: Agregado para identificar al usuario
+        Money totalAmount,
+        PaymentStatus status
+) {
 }

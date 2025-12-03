@@ -31,6 +31,11 @@ public class RabbitMqConfig {
     }
 
     @Bean
+    public Binding reviewBinding(Queue queue, TopicExchange exchange) {
+        return BindingBuilder.bind(queue).to(exchange).with("psychologist.reviewed");
+    }
+
+    @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }

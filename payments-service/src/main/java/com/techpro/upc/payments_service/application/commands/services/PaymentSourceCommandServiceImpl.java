@@ -14,17 +14,16 @@ import java.util.Optional;
 public class PaymentSourceCommandServiceImpl implements PaymentSourceCommandService {
 
     private final PaymentSourceRepository paymentSourceRepository;
+
     public PaymentSourceCommandServiceImpl(PaymentSourceRepository paymentSourceRepository) {
         this.paymentSourceRepository = paymentSourceRepository;
     }
 
-
     @Override
-    public Optional<PaymentSource> handle (CreatePaymentSourceCommand command) {
+    public Optional<PaymentSource> handle(CreatePaymentSourceCommand command) {
         var paymentSource = new PaymentSource(command);
         var createdPaymentSource = paymentSourceRepository.save(paymentSource);
         return Optional.of(createdPaymentSource);
-
     }
 }
 

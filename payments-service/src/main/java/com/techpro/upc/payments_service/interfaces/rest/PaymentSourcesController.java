@@ -9,6 +9,8 @@ import com.techpro.upc.payments_service.interfaces.rest.resources.CreatePaymentS
 import com.techpro.upc.payments_service.interfaces.rest.resources.PaymentSourceResource;
 import com.techpro.upc.payments_service.interfaces.transform.CreatePaymentSourceCommandFromResourceAssembler;
 import com.techpro.upc.payments_service.interfaces.transform.PaymentSourceResourceFromEntityAssembler;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,8 +20,10 @@ import java.util.Optional;
 import static org.springframework.http.HttpStatus.CREATED;
 
 @RestController
-@RequestMapping("/api/v1/payment-sources")
+@RequestMapping(value = "/api/v1/payment-sources", produces = "application/json")
+@Tag(name = "Payments", description = "Payment Gateway Simulation")
 public class PaymentSourcesController {
+
     private final PaymentSourceCommandService paymentSourceCommandService;
     private final PaymentSourceQueryService paymentSourceQueryService;
 
@@ -29,16 +33,23 @@ public class PaymentSourcesController {
     }
 
     @PostMapping
+    @Operation(summary = "Process Payment", description = "Simulates a payment and returns a Transaction ID")
     public ResponseEntity<PaymentSourceResource> createPaymentSource(@RequestBody CreatePaymentSourceResource resource) {
-        Optional<PaymentSource> paymentSource = paymentSourceCommandService.handle(CreatePaymentSourceCommandFromResourceAssembler.toCommandFromResource(resource));
-        return paymentSource.map(source -> new ResponseEntity<>(PaymentSourceResourceFromEntityAssembler.toResourceFromEntity(source), CREATED)).orElseGet(() -> ResponseEntity.badRequest().build());
+        var command = CreatePaymentSourceCommandFromResourceAssembler.toCommandFromResource(resource);
 
+        Optional<PaymentSource> paymentSource = paymentSourceCommandService.handle(command);
+
+        return paymentSource
+                .map(source -> new ResponseEntity<>(PaymentSourceResourceFromEntityAssembler.toResourceFromEntity(source), CREATED))
+                .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<PaymentSourceResource> getPaymentSourceById(@PathVariable Long id){
         Optional<PaymentSource> paymentSource = paymentSourceQueryService.handle(new GetPaymentSourceByIdQuery(id));
-        return paymentSource.map(source -> ResponseEntity.ok(PaymentSourceResourceFromEntityAssembler.toResourceFromEntity(source))).orElseGet( () -> ResponseEntity.notFound().build());
+        return paymentSource
+                .map(source -> ResponseEntity.ok(PaymentSourceResourceFromEntityAssembler.toResourceFromEntity(source)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping
@@ -50,7 +61,6 @@ public class PaymentSourcesController {
                 .toList();
         return ResponseEntity.ok(resources);
     }
-
 }
 
 

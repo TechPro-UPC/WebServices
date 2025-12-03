@@ -26,13 +26,13 @@ public class ReviewSteps {
         r1.setPatientId(1L);
         r1.setPsychologistId(10L);
         r1.setComment("Excelente atención");
-        r1.setRating(5);
+        r1.setStars(5);
 
         Review r2 = new Review();
         r2.setPatientId(2L);
         r2.setPsychologistId(20L);
         r2.setComment("Muy buena experiencia");
-        r2.setRating(4);
+        r2.setStars(4);
 
         reviewRepository.save(r1);
         reviewRepository.save(r2);

@@ -1,0 +1,138 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mindbridge
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "Mark0731%"
+      MYSQL_DATABASE: iam
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  discovery-service:
+    build: ./discovery-service
+    container_name: discovery-service
+    restart: always
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+    depends_on:
+      - mysql
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    restart: always
+    ports:
+      - "8090:8090"
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+    depends_on:
+      - discovery-service
+
+  iam-service:
+    build: ./iam-service
+    container_name: iam-service
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/iam?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Mark0731%
+      - SPRING_FLYWAY_ENABLED=false
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    depends_on:
+      - mysql
+      - discovery-service
+
+  profiles-service:
+    build: ./profiles-service
+    container_name: profiles-service
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/profiles?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Mark0731%
+      - SPRING_FLYWAY_ENABLED=false
+    depends_on:
+      - mysql
+      - discovery-service
+      - iam-service
+
+  scheduling-service:
+    build: ./scheduling-service-pro
+    container_name: scheduling-service-pro
+    restart: always
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/scheduling?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Mark0731%
+      - SPRING_FLYWAY_ENABLED=false
+    depends_on:
+      - mysql
+      - discovery-service
+      - iam-service
+
+  catalog-service:
+    build: ./catalog-service
+    container_name: catalog-service
+    restart: always
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/catalog?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Mark0731%
+      - SPRING_FLYWAY_ENABLED=false
+    depends_on:
+      - mysql
+      - discovery-service
+
+  reviews-service:
+    build: ./reviews-service
+    container_name: reviews-service
+    restart: always
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/reviews?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Mark0731%
+      - SPRING_FLYWAY_ENABLED=false
+    depends_on:
+      - mysql
+      - discovery-service
+
+  payments-service:
+    build: ./payments-service
+    container_name: payments-service
+    restart: always
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_PROFILES_ACTIVE=default
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/payments?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Mark0731%
+      - SPRING_FLYWAY_ENABLED=false
+    depends_on:
+      - mysql
+      - discovery-service
+
+volumes:
+  mysql_data:

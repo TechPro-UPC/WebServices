@@ -15,7 +15,7 @@ public class Reservation extends AuditableAbstractAggregateRoot<Reservation> {
     @Column(nullable = false)  // paciente (user que reserva)
     private Long patientId;
 
-    @Column(nullable = false)  // psicólogo (provider)
+    @Column(name = "psychologist_id")  // ✅ CORRECTO
     private Long psycologistId;
 
     @Column(nullable = false)

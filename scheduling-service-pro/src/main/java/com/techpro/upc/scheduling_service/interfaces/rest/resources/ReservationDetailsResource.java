@@ -8,7 +8,7 @@ import com.techpro.upc.scheduling_service.interfaces.rest.acl.PsycologistDto;
 public record ReservationDetailsResource(
         Long id,
         Long patientId,
-        PsycologistDto psycologist,
+        PsycologistDto psychologistId,
         TimeSlotResource timeSlot,
         Long paymentId
 ) {

@@ -24,13 +24,13 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
     @Override
     public Optional<Reservation> handle(CreateReservationCommand command) {
         if (command.patientId() == null || command.patientId() <= 0 ||
-                command.psycologistId() == null || command.psycologistId() <= 0 ||
+                command.psychologistId() == null || command.psychologistId() <= 0 ||
                 command.timeSlotId() == null || command.timeSlotId() <= 0 ) {
             throw new IllegalArgumentException("Invalid reservation command");
         }
 
         // 🧩 Validar que el psicólogo exista en Profiles Service
-        psychologistContextFacade.fetchPsychologistById(command.psycologistId());
+        psychologistContextFacade.fetchPsychologistById(command.psychologistId());
 
         var reservation = new Reservation(command);
         repository.save(reservation);

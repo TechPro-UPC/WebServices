@@ -16,7 +16,7 @@ public class Reservation extends AuditableAbstractAggregateRoot<Reservation> {
     private Long patientId;
 
     @Column(name = "psychologist_id")  // ✅ CORRECTO
-    private Long psycologistId;
+    private Long psychologistId;
 
     @Column(nullable = false)
     private Long paymentId;
@@ -31,7 +31,7 @@ public class Reservation extends AuditableAbstractAggregateRoot<Reservation> {
 
     public Reservation(CreateReservationCommand command){
         this.patientId     = command.patientId();
-        this.psycologistId = command.psycologistId();
+        this.psychologistId = command.psychologistId();
         this.timeSlotId    = command.timeSlotId();
         this.patientId = command.patientId();
         this.paymentId = command.paymentId();
@@ -39,7 +39,7 @@ public class Reservation extends AuditableAbstractAggregateRoot<Reservation> {
 
     public Long getId() { return id; }
     public Long getPatientId() { return patientId; }
-    public Long getPsycologistId() { return psycologistId; }
+    public Long getPsycologistId() { return psychologistId; }
     public Long getTimeSlotId() { return timeSlotId; }
     public Long getPaymentId() { return paymentId; }
 

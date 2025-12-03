@@ -3,7 +3,7 @@ package com.techpro.upc.scheduling_service.interfaces.rest.resources;
 public record ReservationResource(
         Long id,
         Long patientId,
-        Long psycologistId,
+        Long psychologistId,
         Long timeSlotId,
         Long paymentId
 ) {}

@@ -12,7 +12,7 @@ public class ReviewResourceFromEntityAssembler {
                 entity.getId(),
                 entity.getPatientId(),
                 entity.getPsychologistId(),
-                entity.getRating(),
+                entity.getStars(),
                 entity.getComment(),
                 entity.isRead()
         );

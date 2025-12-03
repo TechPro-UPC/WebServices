@@ -3,8 +3,10 @@ package com.techpro.upc.reviews_service.application.internal.commandservices;
 import com.techpro.upc.reviews_service.domain.model.aggregates.Review;
 import com.techpro.upc.reviews_service.domain.model.commands.CreateReviewCommand;
 import com.techpro.upc.reviews_service.domain.model.commands.DeleteReviewCommand;
+import com.techpro.upc.reviews_service.domain.model.events.PsychologistReviewedEvent;
 import com.techpro.upc.reviews_service.domain.model.services.ReviewCommandService;
 import com.techpro.upc.reviews_service.infrastructure.persistence.jpa.repositories.ReviewRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -16,9 +18,11 @@ import java.util.Optional;
 public class ReviewCommandServiceImpl implements ReviewCommandService {
 
     private final ReviewRepository reviewRepository;
+    private final ApplicationEventPublisher eventPublisher; // 👈 Inyectamos el Publicador
 
-    public ReviewCommandServiceImpl(ReviewRepository reviewRepository) {
+    public ReviewCommandServiceImpl(ReviewRepository reviewRepository, ApplicationEventPublisher eventPublisher) {
         this.reviewRepository = reviewRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -32,8 +36,18 @@ public class ReviewCommandServiceImpl implements ReviewCommandService {
         }
 
         var review = new Review(command);
-        reviewRepository.save(review);
-        return Optional.of(review);
+        var savedReview = reviewRepository.save(review);
+
+        // 📢 PUBLICAR EVENTO (RabbitMQ)
+        // Esto avisa al Catalog Service para que recalcule el rating promedio
+        var event = new PsychologistReviewedEvent(
+                this,
+                savedReview.getPsychologistId(),
+                savedReview.getStars()
+        );
+        eventPublisher.publishEvent(event);
+
+        return Optional.of(savedReview);
     }
 
     @Override

@@ -110,6 +110,4 @@ public class ReviewsController {
         reviewCommandService.handle(command);
         return ResponseEntity.ok("Review deleted successfully");
     }
-
-
 }

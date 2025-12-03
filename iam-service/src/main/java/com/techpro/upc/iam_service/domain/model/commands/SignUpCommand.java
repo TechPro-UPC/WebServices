@@ -1,5 +1,7 @@
 package com.techpro.upc.iam_service.domain.model.commands;
 
 
-public record SignUpCommand(String email, String password) {
+import com.techpro.upc.iam_service.domain.model.aggregates.Role;
+
+public record SignUpCommand(String email, String password, Role role) {
 }

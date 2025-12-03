@@ -2,6 +2,7 @@ package com.techpro.upc.profiles_service.application.internal.commandservices;
 
 import com.techpro.upc.profiles_service.domain.model.aggregates.Patient;
 import com.techpro.upc.profiles_service.domain.model.commands.CreatePatientCommand;
+import com.techpro.upc.profiles_service.domain.model.commands.UpdatePatientCommand;
 import com.techpro.upc.profiles_service.domain.services.PatientCommandService;
 import com.techpro.upc.profiles_service.infrastructure.persistance.jpa.repositories.PatientRepository;
 import com.techpro.upc.profiles_service.infrastructure.persistance.jpa.repositories.PsychologistRepository;
@@ -15,44 +16,40 @@ import java.util.Optional;
 public class PatientCommandServiceImpl implements PatientCommandService {
 
     private final PatientRepository patientRepository;
-    private final PsychologistRepository psychologistRepository;
 
-
-
-    public PatientCommandServiceImpl(PatientRepository patientRepository,
-                                     PsychologistRepository psychologistRepository) {
+    // Eliminamos IamClient y PsychologistRepository porque el perfil ya fue creado por RabbitMQ
+    public PatientCommandServiceImpl(PatientRepository patientRepository) {
         this.patientRepository = patientRepository;
-        this.psychologistRepository = psychologistRepository;
     }
 
     @Override
-    @Transactional
-    public Optional<Patient> handle(CreatePatientCommand command) {
+    public Optional<Patient> handle(UpdatePatientCommand command) {
+        // 1. Buscamos el perfil "cascarón" que creó RabbitMQ
+        var result = patientRepository.findById(command.id());
 
-
-        // Confiamos en que el userId es válido gracias a la validación del JWT.
-
-        // 1️⃣ Validar duplicado en pacientes
-        if (patientRepository.findByUserId(command.userId()).isPresent()) {
-            throw new IllegalArgumentException("Ya existe un paciente asociado a ese usuario.");
+        if (result.isEmpty()) {
+            throw new IllegalArgumentException("El perfil de paciente con ID " + command.id() + " no existe.");
         }
 
-        // 2️⃣ Validar duplicado cruzado (usuario es psicólogo)
-        if (psychologistRepository.findByUserId(command.userId()).isPresent()) {
-            throw new IllegalArgumentException("Ese usuario ya está registrado como psicólogo, no puede ser paciente.");
+        var patientToUpdate = result.get();
+
+        // 2. Validar que el DNI no esté siendo usado por OTRO paciente
+        var patientWithSameDni = patientRepository.findByDni(command.dni());
+        if (patientWithSameDni.isPresent() && !patientWithSameDni.get().getId().equals(command.id())) {
+            throw new IllegalArgumentException("El DNI " + command.dni() + " ya está registrado por otro paciente.");
         }
 
-        // 3️⃣ Crear y guardar
-        var patient = new Patient(
+        // 3. Actualizamos los datos usando el metodo de dominio
+        patientToUpdate.updateProfile(
                 command.firstName(),
                 command.lastName(),
                 command.dni(),
                 command.phone(),
-                command.gender(),
-                command.userId()
+                command.gender()
         );
 
-        var saved = patientRepository.save(patient);
-        return Optional.of(saved);
+        // 4. Guardamos los cambios
+        var updatedPatient = patientRepository.save(patientToUpdate);
+        return Optional.of(updatedPatient);
     }
 }
